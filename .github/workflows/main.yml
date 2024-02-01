@@ -11,13 +11,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up environment
+        run: |
+          echo "HOST=${{ secrets.HOST }}" >> $GITHUB_ENV
+
       - name: Generate traffic
-        env:
-          HOST: ${{ secrets.HOST }}
         run: |
           while true; do
             N=$(shuf -i 1-100 -n 1)
             echo "Making ${N} random requests"
-            shuf -n ${N} urls.txt | envsubst | xargs -t -I {} bash -c "curl {} -o /dev/null; sleep 1;" || true &
+            shuf -n ${N} urls.txt | xargs -I {} bash -c "curl $HOST{} -o /dev/null; sleep 1;" || true
             sleep 5
           done
